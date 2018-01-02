@@ -5,9 +5,8 @@ Rectangle {
     anchors.fill: parent
 
     property int nextTileTime: 500
-
-    property BoardTile headTile
     property BoardTile tailTile
+    property BoardTile headTile
 
     Grid{
         id: grid
@@ -24,16 +23,17 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        console.log("before clicked: X", head.x)
-                        head.x = tile.x
-                        head.y = tile.y
-                        headTile = tile
-                        console.log("after clicked: X", head.x)
+                        head.currentTile = head.nextTile
                     }
                 }
                 Component.onCompleted: {
-                    if(index == 300)
-                        headTile = tile
+                    if(index == 300){
+                        head.currentTile = tile
+//                        head.x = tile.col*40
+//                        head.y = tile.row*40
+                    }
+                    else if(index == 301)
+                        head.nextTile = tile
                     else if(index == 298)
                         tailTile = tile
                 }
@@ -43,17 +43,18 @@ Rectangle {
 
     SnakeHead{
         id: head
-        x: headTile.x
-        y: headTile.y
+        x: 480
+        y: 240
         currentTile: headTile
+        nextTile: headTile
         onStateChanged: {
             updateTargetTile()
             stateChangedFlag = true
         }
-//        onCurrentTileChanged: {
-//            x = currentTile.x
-//            y = currentTile.y
-//        }
+        onCurrentTileChanged: {
+            x = currentTile.x
+            y = currentTile.y
+        }
 
         function updateTargetTile(){
             if(!stateChangedFlag && currentTile != null){
@@ -71,6 +72,12 @@ Rectangle {
                 }
             }
         }
+
+        function setCurrentTile(){
+            currentTile = nextTile
+            stateChangedFlag = false
+        }
+
         Behavior on x {
 
             NumberAnimation {
@@ -79,13 +86,11 @@ Rectangle {
                 //This selects an easing curve to interpolate with, the default is Easing.Linear
                 easing.type: Easing.Linear
                 onRunningChanged: {
-                    if(running == true){
+                    if(running == false){
                         head.currentTile.isSnake = true
+                        head.updateTargetTile()
+                        head.setCurrentTile()
                     }
-//                    else if(running == false){
-//                        head.currentTile = head.nextTile
-//                        head.stateChangedFlag = false
-//                    }
                 }
             }
         }
@@ -97,13 +102,11 @@ Rectangle {
                 //This selects an easing curve to interpolate with, the default is Easing.Linear
                 easing.type: Easing.Linear
                 onRunningChanged: {
-                    if(running == true){
+                    if(running == false){
                         head.currentTile.isSnake = true
+                        head.updateTargetTile()
+                        head.setCurrentTile()
                     }
-//                    else if(running == false){
-//                        head.currentTile = head.nextTile
-//                        head.stateChangedFlag = false
-//                    }
                 }
             }
         }
