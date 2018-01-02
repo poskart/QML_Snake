@@ -24,19 +24,30 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         head.currentTile = head.nextTile
+                        tail.currentTile = tail.nextTile
                     }
                 }
                 Component.onCompleted: {
                     if(index == 300){
                         tile.isSnake = true
+                        tile.state = "right"
                         head.currentTile = tile
-                        head.x = tile.col*40
-                        head.y = tile.row*40
+                        head.x = tile.col*tile.width
+                        head.y = tile.row*tile.height
                     }
                     else if(index == 301)
                         head.nextTile = tile
-                    else if(index == 298)
-                        tailTile = tile
+                    else if(index == 298){
+                        tile.state = "right"
+                        tail.currentTile = tile
+                        tail.x = tile.col*tile.width
+                        tail.y = tile.row*tile.height
+                    }
+                    else if(index == 299){
+                        tile.isSnake = true
+                        tile.state = "right"
+                        tail.nextTile = tile
+                    }
                 }
             }
         }
@@ -44,17 +55,9 @@ Rectangle {
 
     SnakeHead{
         id: head
-        x: 480
-        y: 240
-        currentTile: headTile
-        nextTile: headTile
         onStateChanged: {
             updateTargetTile()
             stateChangedFlag = true
-        }
-        onCurrentTileChanged: {
-            x = currentTile.x
-            y = currentTile.y
         }
 
         function updateTargetTile(){
@@ -80,16 +83,14 @@ Rectangle {
         }
 
         Behavior on x {
-
             NumberAnimation {
-                //This specifies how long the animation takes
                 duration: snakeBoard.nextTileTime
-                //This selects an easing curve to interpolate with, the default is Easing.Linear
                 easing.type: Easing.Linear
                 onRunningChanged: {
                     if(running == false){
                         head.stateChangedFlag = false
                         head.currentTile.isSnake = true
+                        head.currentTile.state = head.state
                         head.updateTargetTile()
                         head.setCurrentTile()
                     }
@@ -97,16 +98,14 @@ Rectangle {
             }
         }
         Behavior on y {
-
             NumberAnimation {
-                //This specifies how long the animation takes
                 duration: snakeBoard.nextTileTime
-                //This selects an easing curve to interpolate with, the default is Easing.Linear
                 easing.type: Easing.Linear
                 onRunningChanged: {
                     if(running == false){
                         head.stateChangedFlag = false
                         head.currentTile.isSnake = true
+                        head.currentTile.state = head.state
                         head.updateTargetTile()
                         head.setCurrentTile()
                     }
@@ -117,8 +116,51 @@ Rectangle {
 
     SnakeTail{
         id: tail
-        x: tailTile.x
-        y: tailTile.y
+
+        function updateTargetTile(){
+            if(currentTile.state == "up")
+                nextTile = tilesRepeater.itemAt((currentTile.row-1)*grid.columns+currentTile.col)
+            else if(currentTile.state == "down"){
+                nextTile = tilesRepeater.itemAt((currentTile.row+1)*grid.columns+currentTile.col)
+            }
+            else if(currentTile.state == "right"){
+                nextTile = tilesRepeater.itemAt((currentTile.row)*grid.columns+currentTile.col + 1)
+            }
+            else if(currentTile.state == "left"){
+                nextTile = tilesRepeater.itemAt((currentTile.row)*grid.columns+currentTile.col - 1)
+            }
+        }
+
+        function setCurrentTile(){
+            currentTile = nextTile
+        }
+
+        Behavior on x {
+            NumberAnimation {
+                duration: snakeBoard.nextTileTime
+                easing.type: Easing.Linear
+                onRunningChanged: {
+                    if(running == false){
+                        tail.currentTile.isSnake = false
+                        tail.updateTargetTile()
+                        tail.setCurrentTile()
+                    }
+                }
+            }
+        }
+        Behavior on y {
+            NumberAnimation {
+                duration: snakeBoard.nextTileTime
+                easing.type: Easing.Linear
+                onRunningChanged: {
+                    if(running == false){
+                        tail.currentTile.isSnake = false
+                        tail.updateTargetTile()
+                        tail.setCurrentTile()
+                    }
+                }
+            }
+        }
     }
 
 

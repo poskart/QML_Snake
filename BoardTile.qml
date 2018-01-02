@@ -8,6 +8,22 @@ Rectangle{
     property int row
     property int col
     property bool isSnake: false
+
+    states:[
+        State{
+            name: "right"
+        },
+        State{
+            name: "left"
+        },
+        State{
+            name: "up"
+        },
+        State{
+            name: "down"
+        }
+    ]
+
     Rectangle{
         id: innerRect
         height: tile.height - 6
