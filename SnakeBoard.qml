@@ -28,9 +28,10 @@ Rectangle {
                 }
                 Component.onCompleted: {
                     if(index == 300){
+                        tile.isSnake = true
                         head.currentTile = tile
-//                        head.x = tile.col*40
-//                        head.y = tile.row*40
+                        head.x = tile.col*40
+                        head.y = tile.row*40
                     }
                     else if(index == 301)
                         head.nextTile = tile
@@ -87,6 +88,7 @@ Rectangle {
                 easing.type: Easing.Linear
                 onRunningChanged: {
                     if(running == false){
+                        head.stateChangedFlag = false
                         head.currentTile.isSnake = true
                         head.updateTargetTile()
                         head.setCurrentTile()
@@ -103,6 +105,7 @@ Rectangle {
                 easing.type: Easing.Linear
                 onRunningChanged: {
                     if(running == false){
+                        head.stateChangedFlag = false
                         head.currentTile.isSnake = true
                         head.updateTargetTile()
                         head.setCurrentTile()
