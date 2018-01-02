@@ -5,12 +5,19 @@ Rectangle {
     anchors.fill: parent
 
     property int nextTileTime: 200
+    property int nextTileTailTime: nextTileTime
+    property int nextTileHeadTime: nextTileTime
     property BoardTile tailTile
     property BoardTile headTile
+    property bool foodEaten: false
+    property bool gameStarted: false
 
     function generateFood(){
-        var randomIndex = Math.floor(Math.random() * (grid.columns * grid.rows))
-        var tmpTile = tilesRepeater.itemAt(randomIndex)
+        var tmpTile = tail.nextTile
+        while(tmpTile.isSnake){
+            var randomIndex = Math.floor(Math.random() * (grid.columns * grid.rows))
+            tmpTile = tilesRepeater.itemAt(randomIndex)
+        }
         tmpTile.isFood = true
     }
 
@@ -29,9 +36,12 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        head.currentTile = head.nextTile
-                        tail.currentTile = tail.nextTile
-                        snakeBoard.generateFood()
+                        if(!gameStarted){
+                            head.currentTile = head.nextTile
+                            tail.currentTile = tail.nextTile
+                            generateFood()
+                            gameStarted = true
+                        }
                     }
                 }
                 Component.onCompleted: {
@@ -69,7 +79,10 @@ Rectangle {
 
         function checkFood(){
             if(head.currentTile.isFood){
-                tail.pauseAnimations()
+                if(nextTileTime > 50)
+                    nextTileTime -= 5
+                foodEaten = true
+                generateFood()
             }
         }
 
@@ -78,6 +91,8 @@ Rectangle {
                     (head.currentTile.row == (grid.rows - 1) && head.state == "down") ||
                     (head.currentTile.col == 0 && head.state == "left") ||
                     (head.currentTile.col == (grid.columns - 1) && head.state == "right"))
+                Qt.quit()
+            if(head.nextTile != null && head.nextTile.isSnake == true)
                 Qt.quit()
         }
 
@@ -107,10 +122,8 @@ Rectangle {
         }
 
         Behavior on x {
-            id: behaviorXHead
             NumberAnimation {
-                id: xAnimHead
-                duration: snakeBoard.nextTileTime
+                duration: snakeBoard.nextTileHeadTime
                 easing.type: Easing.Linear
                 onRunningChanged: {
                     if(running == false){
@@ -127,10 +140,8 @@ Rectangle {
             }
         }
         Behavior on y {
-            id: behaviorYHead
             NumberAnimation {
-                id: yAnimHead
-                duration: snakeBoard.nextTileTime
+                duration: snakeBoard.nextTileHeadTime
                 easing.type: Easing.Linear
                 onRunningChanged: {
                     if(running == false){
@@ -170,25 +181,11 @@ Rectangle {
             currentTile = nextTile
         }
 
-        function pauseAnimations(){
-            if(behaviorXTail.animation.running){
-                pausedAnimation = behaviorXTail.animation
-            }
-            else if(behaviorYTail.animation.running){
-                pausedAnimation = behaviorYTail.animation
-            }
-            pausedAnimation.pause()
-        }
-
-        function resumeAnimations(){
-            pausedAnimation.resume()
-        }
-
         Behavior on x {
             id: behaviorXTail
             NumberAnimation {
                 id: xAnimTail
-                duration: snakeBoard.nextTileTime
+                duration: snakeBoard.nextTileTailTime
                 easing.type: Easing.Linear
                 onRunningChanged: {
                     if(running == false){
@@ -196,6 +193,12 @@ Rectangle {
                         tail.currentTile.isFood = false
                         tail.updateTargetTile()
                         tail.setCurrentTile()
+                        if(foodEaten){
+                            nextTileTailTime = nextTileTailTime*2
+                            foodEaten = false
+                        }
+                        else
+                            nextTileTailTime = nextTileHeadTime
                     }
                 }
             }
@@ -204,13 +207,20 @@ Rectangle {
             id: behaviorYTail
             NumberAnimation {
                 id: yAnimTail
-                duration: snakeBoard.nextTileTime
+                duration: snakeBoard.nextTileTailTime
                 easing.type: Easing.Linear
                 onRunningChanged: {
                     if(running == false){
                         tail.currentTile.isSnake = false
+                        tail.currentTile.isFood = false
                         tail.updateTargetTile()
                         tail.setCurrentTile()
+                        if(foodEaten){
+                            nextTileTailTime = nextTileTailTime*2
+                            foodEaten = false
+                        }
+                        else
+                            nextTileTailTime = nextTileHeadTime
                     }
                 }
             }
@@ -247,10 +257,6 @@ Rectangle {
             console.log("Game over")
             Qt.quit()
         }
-        else if(event.key == Qt.Key_N){
-            snake.addSnakePart()
-        }
-
         event.accepted = true
     }
 }
