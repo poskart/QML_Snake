@@ -8,6 +8,7 @@ Rectangle{
     property int row
     property int col
     property bool isSnake: false
+    property bool isFood: false
 
     states:[
         State{
@@ -35,6 +36,16 @@ Rectangle{
         if(isSnake){
             tile.color = "#BBBBFF"
             innerRect.color = "#BBBBFF"
+        }
+        else{
+            tile.color = "#003311"
+            innerRect.color = "#006622"
+        }
+    }
+    onIsFoodChanged: {
+        if(isFood){
+            tile.color = "#BB8899"
+            innerRect.color = "#FF99AA"
         }
         else{
             tile.color = "#003311"
