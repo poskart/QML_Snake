@@ -5,6 +5,5 @@
         <file>SnakeBoard.qml</file>
         <file>SnakePart.qml</file>
         <file>SnakeHead.qml</file>
-        <file>SnakeTail.qml</file>
     </qresource>
 </RCC>

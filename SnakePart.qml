@@ -10,7 +10,9 @@ Rectangle {
     height: width
 
     onCurrentTileChanged: {
-        x = currentTile.x
-        y = currentTile.y
+        if(currentTile != null){
+            x = currentTile.x
+            y = currentTile.y
+        }
     }
 }

@@ -159,7 +159,7 @@ Rectangle {
         }
     }
 
-    SnakeTail{
+    SnakePart{
         id: tail
         property NumberAnimation pausedAnimation
 
